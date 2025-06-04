@@ -1,20 +1,18 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import searchRoutes from './routes/searchRoutes.js';
-import historyRoutes from './routes/historyRoutes.js';
+import errorHandler from './utils/errorHandler.js';
 
 dotenv.config();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/api/search', searchRoutes);
-app.use('/api/history', historyRoutes);
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
+app.use(errorHandler);
 
 export default app;

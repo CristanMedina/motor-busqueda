@@ -1,22 +1,33 @@
-import { searchYouTube, searchDevto, searchGoogleBooks, searchGitHub } from '../services/apiServices.js';
+import {
+  searchYouTube,
+  searchGoogleBooks,
+  searchDevto,
+} from '../services/apiServices.js';
 
-export const searchResources = async (req, res) => {
-  const query = req.query.q;
-  if (!query) return res.status(400).json({ error: 'Falta el parámetro de búsqueda "q"' });
-
+export const searchResources = async (req, res, next) => {
   try {
-    const [youtubeResults, devtoResults, booksResults, githubResults] = await Promise.all([
+    const query = req.query.q;
+
+    const [youtubeResults, booksResults, devtoResults] = await Promise.all([
       searchYouTube(query),
-      searchDevto(query),
       searchGoogleBooks(query),
-      searchGitHub(query)
+      searchDevto(query),
     ]);
 
-    const combined = [...youtubeResults, ...devtoResults, ...booksResults, ...githubResults];
-    res.json({ results: combined });
+    const combinedResults = [
+      ...youtubeResults,
+      ...booksResults,
+      ...devtoResults,
+    ];
+
+    res.json({
+      success: true,
+      count: combinedResults.length,
+      query,
+      results: combinedResults
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al buscar recursos' });
+    next(error);
   }
 };
